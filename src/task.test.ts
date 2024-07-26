@@ -2,8 +2,8 @@ import test from 'ava';
 
 import { CORRECT } from './correctResult';
 import { INCORRECT } from './currentResult';
-import { Category, getCategories } from './mockedApi';
-import { categoryTree, getOrder } from './task';
+import { getCategories } from './mockedApi';
+import { categoryTree, determineOrder } from './task';
 
 /* Main task tests */
 test('main task: result is as same as CORRECT', async (t) => {
@@ -19,17 +19,17 @@ test('main task: result fails when comapred to INCORRECT', async (t) => {
 });
 
 /* Get order */
-test('function getOrder is taken from title if includes hash', (t) => {
-  const order = getOrder({ id: 1, Title: '2#test' } as Category);
+test('function determineOrder is taken from title if includes hash', (t) => {
+  const order = determineOrder('2#test', 1);
   t.is(order, 2);
 });
 
-test('function getOrder is taken from order if title is NaN', (t) => {
-  const order = getOrder({ id: 12, Title: 'test' } as Category);
+test('function determineOrder is taken from order if title is NaN', (t) => {
+  const order = determineOrder('test', 12);
   t.is(order, 12);
 });
 
-test('function getOrder is taken from title if consists of number only', (t) => {
-  const order = getOrder({ id: 4, Title: '23' } as Category);
+test('function determineOrder is taken from title if consists of number only', (t) => {
+  const order = determineOrder('23', 4);
   t.is(order, 23);
 });

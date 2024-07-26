@@ -28,7 +28,7 @@ export function createCategoryListElements(
       id: category.id,
       image: category.MetaTagDescription,
       name: category.name,
-      order: getOrder(category),
+      order: determineOrder(category.Title, category.id),
       children: createCategoryListElements(category.children),
       showOnHome: isRoot && index < 5,
     }))
@@ -38,7 +38,10 @@ export function createCategoryListElements(
 /* Export these below only for testing purposes - mentally it's a part of this module.
 Anyways, these functions seem to be quite generic, so some of them could be also part of utils. */
 
-export function getOrder(category: Category): number {
-  const orderAsInteger = parseInt(category.Title);
-  return isNaN(orderAsInteger) ? category.id : orderAsInteger;
+export function determineOrder(
+  title: Category['Title'],
+  id: Category['id']
+): number {
+  const orderAsInteger = parseInt(title);
+  return isNaN(orderAsInteger) ? id : orderAsInteger;
 }
