@@ -9,27 +9,19 @@ export interface CategoryListElement {
   showOnHome: boolean;
 }
 
-type DataOf<T> = { data: T };
-
-type DataFetcherFn<T> = () => Promise<DataOf<T>>;
-type DataTransformerFn<Input, Output> = (data: Input) => Output;
+type DataFetcherFn<T> = () => Promise<{ data: T }>;
 
 export const categoryTree = async (
-  dataFetcher: DataFetcherFn<Category[]>,
-  dataTransformer: DataTransformerFn<Category[], CategoryListElement[]>
+  dataFetcher: DataFetcherFn<Category[]>
 ): Promise<CategoryListElement[]> => {
   const { data } = await dataFetcher();
 
-  if (!data) {
-    return [];
-  }
-
-  return dataTransformer(data);
+  return createCategoryListElements(data, true);
 };
 
 export function createCategoryListElements(
   categories: Category[],
-  depth = 1
+  isRoot = false
 ): CategoryListElement[] {
   return categories
     .map((category, index) => ({
@@ -37,47 +29,16 @@ export function createCategoryListElements(
       image: category.MetaTagDescription,
       name: category.name,
       order: getOrder(category),
-      children: category.hasChildren
-        ? createCategoryListElements(category.children, depth + 1)
-        : [],
-      showOnHome:
-        depth === 1 &&
-        (arrayShorterEqualThan(5, categories) ||
-          isOrderedByHash(category) ||
-          isItemIndexLessThan(3, index)),
+      children: createCategoryListElements(category.children),
+      showOnHome: isRoot && index < 5,
     }))
     .sort((a, b) => a.order - b.order);
 }
 
 /* Export these below only for testing purposes - mentally it's a part of this module.
 Anyways, these functions seem to be quite generic, so some of them could be also part of utils. */
-export function arrayShorterEqualThan(num: number, array: unknown[]) {
-  if (!Array.isArray(array)) return false;
-  return array.length <= num;
-}
-
-export function isItemIndexLessThan(num: number, index: number) {
-  if (
-    typeof num !== 'number' ||
-    isNaN(num) ||
-    typeof index !== 'number' ||
-    isNaN(index)
-  ) {
-    throw new Error('Either num or index are not numbers!');
-  }
-  return index < num;
-}
 
 export function getOrder(category: Category): number {
-  let order = category.Title;
-  if (isOrderedByHash(category)) {
-    order = category.Title.split('#')[0];
-  }
-
-  const orderAsInteger = parseInt(order);
+  const orderAsInteger = parseInt(category.Title);
   return isNaN(orderAsInteger) ? category.id : orderAsInteger;
-}
-
-export function isOrderedByHash(category: Category) {
-  return category?.Title.includes('#');
 }
