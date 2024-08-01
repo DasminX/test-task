@@ -1,5 +1,7 @@
 import { Category } from './mockedApi';
 
+// Refactored/done task
+
 export interface CategoryListElement {
   name: string;
   id: number;
